@@ -1,29 +1,32 @@
-import "./Home.css";
+import "./Search.css";
 
-// Components
-import LikeContainer from "../../components/LikeContainer";
-import Photoitem from "../../components/PhotoItem";
-import { Link } from "react-router-dom";
-
-// Hooks
+//hoks
 import { useEffect } from "react";
+
 import { useSelector, useDispatch } from "react-redux";
 import { useResetComponentMessage } from "../../hooks/useResetComponent";
 
-// Redux
+import LikeContainer from "../../components/LikeContainer";
+import Photoitem from "../../components/PhotoItem";
+import { Link } from "react-router-dom";
+import { useQuery } from "../../hooks/useQuery";
 
-import { getPhotos, like } from "../../slices/photoSlice";
-const Home = () => {
+import { searchPhotos, like } from "../../slices/photoSlice";
+
+const Search = () => {
+  const query = useQuery();
+  const search = query.get("q");
+
   const dispatch = useDispatch();
-  const resetMessage = useResetComponentMessage(dispatch);
 
+  const resetMessage = useResetComponentMessage(dispatch);
   const { user } = useSelector((state) => state.auth);
   const { photos, loading } = useSelector((state) => state.photo);
 
-  //Load all photos
+  //load photos
   useEffect(() => {
-    dispatch(getPhotos());
-  }, [dispatch]);
+    dispatch(searchPhotos(search));
+  }, [dispatch, search]);
 
   // Like a photo
   const handleLike = (photo) => {
@@ -37,7 +40,8 @@ const Home = () => {
   }
 
   return (
-    <div id="home">
+    <div id="search">
+      <h2>Voce está buscando por: {search}</h2>
       {photos &&
         photos.map((photo) => (
           <div key={photo._id}>
@@ -50,7 +54,7 @@ const Home = () => {
         ))}
       {photos && photos.length === 0 && (
         <h2 className="no-photos">
-          Ainda não há fotos publicadas
+          Não foram encontrados resultados para a sua busca...
           <Link to={`/users/${user.userId}`}></Link>
         </h2>
       )}
@@ -58,4 +62,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default Search;
