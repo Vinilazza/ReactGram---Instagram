@@ -1,5 +1,7 @@
 import "./Navbar.css";
 
+import { uploads } from "../utils/config";
+
 import { NavLink, Link } from "react-router-dom";
 import {
   BsSearch,
@@ -14,11 +16,14 @@ import { useNavigate } from "react-router-dom";
 
 //REDUx
 import { logout, reset } from "../slices/authSlice";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { profile } from "../slices/userSlice";
 
 const Navbar = () => {
   const { auth } = useAuth();
   const { user } = useSelector((state) => state.auth);
+
+  const { user: usuario } = useSelector((state) => state.user);
 
   const [query, setQuery] = useState("");
 
@@ -32,6 +37,11 @@ const Navbar = () => {
 
     navigate("/login");
   };
+  // Load user data
+  useEffect(() => {
+    dispatch(profile());
+  }, [dispatch]);
+
   const handleSearch = (e) => {
     e.preventDefault();
 
@@ -42,7 +52,7 @@ const Navbar = () => {
 
   return (
     <nav id="nav">
-      <Link to={"/"}>ReactGram</Link>
+      <Link to={"/"}>ViniSocialMedia</Link>
       <form id="search-form" onSubmit={handleSearch}>
         <BsSearch />
         <input
@@ -60,17 +70,32 @@ const Navbar = () => {
               </NavLink>
             </li>
             {user && (
-              <li>
-                <NavLink to={`/users/${user._id}`}>
-                  <BsFillCameraFill />
-                </NavLink>
-              </li>
+              <>
+                <li>
+                  <NavLink to={`/users/${user._id}`}>
+                    <BsFillCameraFill />
+                  </NavLink>
+                </li>
+
+                {usuario.profileImage && (
+                  <NavLink to="/profile">
+                    <img
+                      id="img-icon"
+                      src={`${uploads}/users/${usuario.profileImage}`}
+                      alt={user.name}
+                    />
+                  </NavLink>
+                )}
+                {!usuario.profileImage && (
+                  <li>
+                    <NavLink to="/profile">
+                      <BsFillPersonFill />
+                    </NavLink>
+                  </li>
+                )}
+              </>
             )}
-            <li>
-              <NavLink to="/profile">
-                <BsFillPersonFill />
-              </NavLink>
-            </li>
+
             <li>
               <span onClick={handleLogout}>Sair</span>
             </li>

@@ -121,11 +121,10 @@ const Profile = () => {
   const handleCancelEdit = (e) => {
     hideOrShowForms();
   };
-  if (loading) {
-    return <p>Carregando...</p>;
-  }
+
   return (
     <div id="profile">
+      {loading && <div className="spinner"></div>}
       <div className="profile-header">
         {user.profileImage && (
           <img src={`${uploads}/users/${user.profileImage}`} alt={user.name} />
