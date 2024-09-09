@@ -132,6 +132,20 @@ export const searchPhotos = createAsyncThunk(
     return data;
   }
 );
+//Unlike photo
+export const unlikePhoto = createAsyncThunk(
+  "photo/unlike",
+  async (id, thunkAPI) => {
+    const token = thunkAPI.getState().auth.user.token;
+
+    const data = await photoService.unlikePhoto(id, token);
+    // Check for errors
+    if (data.errors) {
+      return thunkAPI.rejectWithValue(data.errors[0]);
+    }
+    return data;
+  }
+);
 
 export const photoSlice = createSlice({
   name: "publish",
@@ -272,6 +286,36 @@ export const photoSlice = createSlice({
         state.success = true;
         state.error = null;
         state.photos = action.payload;
+      })
+      .addCase(unlikePhoto.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(unlikePhoto.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = true;
+        state.error = null;
+
+        if (state.photo.likes) {
+          state.photo.likes = state.photo.likes.filter(
+            (id) => id !== action.payload.userId
+          );
+        }
+        state.photos.map((photo) => {
+          if (photo._id === action.payload.photoId) {
+            photo.likes = photo.likes.filter(
+              (id) => id !== action.payload.userId
+            );
+          }
+          return photo;
+        });
+
+        state.message = action.payload.message;
+      })
+      .addCase(unlikePhoto.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+        state.photo = null;
       });
   },
 });

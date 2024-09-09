@@ -1,7 +1,6 @@
 import "./Home.css";
 
 // Components
-import LikeContainer from "../../components/LikeContainer";
 import Photoitem from "../../components/PhotoItem";
 import { Link } from "react-router-dom";
 
@@ -12,7 +11,8 @@ import { useResetComponentMessage } from "../../hooks/useResetComponent";
 
 // Redux
 
-import { getPhotos, like } from "../../slices/photoSlice";
+import { getPhotos, like, unlikePhoto } from "../../slices/photoSlice";
+
 const Home = () => {
   const dispatch = useDispatch();
   const resetMessage = useResetComponentMessage(dispatch);
@@ -32,6 +32,11 @@ const Home = () => {
     resetMessage();
   };
 
+  const handleDislike = (photo) => {
+    dispatch(unlikePhoto(photo._id));
+    resetMessage();
+  };
+
   if (loading) {
     return <p>Carregando</p>;
   }
@@ -41,8 +46,12 @@ const Home = () => {
       {photos &&
         photos.map((photo) => (
           <div key={photo._id}>
-            <Photoitem photo={photo} />
-            <LikeContainer photo={photo} user={user} handleLike={handleLike} />
+            <Photoitem
+              photo={photo}
+              user={user}
+              handleLike={handleLike}
+              handleDislike={handleDislike}
+            />
             <Link className="btn" to={`/photos/${photo._id}`}>
               Ver mais
             </Link>

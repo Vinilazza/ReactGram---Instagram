@@ -10,9 +10,8 @@ import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useResetComponentMessage } from "../../hooks/useResetComponent";
-import { getPhoto, like, comment } from "../../slices/photoSlice";
+import { getPhoto, like, comment, unlikePhoto } from "../../slices/photoSlice";
 import PhotoItem from "../../components/PhotoItem";
-import LikeContainer from "../../components/LikeContainer";
 
 const Photo = () => {
   const { id } = useParams();
@@ -34,9 +33,14 @@ const Photo = () => {
     dispatch(getPhoto(id));
   }, [dispatch, id]);
 
-  const handleLike = () => {
+  const handleLike = (photo) => {
     dispatch(like(photo._id));
 
+    resetMessage();
+  };
+
+  const handleDislike = (photo) => {
+    dispatch(unlikePhoto(photo._id));
     resetMessage();
   };
   // LIKE E comentarios
@@ -61,8 +65,12 @@ const Photo = () => {
 
   return (
     <div id="photo">
-      <PhotoItem photo={photo} />
-      <LikeContainer photo={photo} user={user} handleLike={handleLike} />
+      <PhotoItem
+        photo={photo}
+        user={user}
+        handleLike={handleLike}
+        handleDislike={handleDislike}
+      />
       <div className="message-container">
         {error && <Message msg={error} type="error" />}
         {message && <Message msg={message} type="success" />}

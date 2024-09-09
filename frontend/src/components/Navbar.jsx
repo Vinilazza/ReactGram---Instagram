@@ -82,7 +82,7 @@ const Navbar = () => {
                     <img
                       id="img-icon"
                       src={`${uploads}/users/${usuario.profileImage}`}
-                      alt={user.name}
+                      alt={usuario.name}
                     />
                   </NavLink>
                 )}

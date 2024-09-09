@@ -17,8 +17,6 @@ export const profile = createAsyncThunk(
 
     const data = await userService.profile(user, token);
 
-    console.log(data);
-
     return data;
   }
 );

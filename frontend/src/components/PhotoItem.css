@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=SUSE:wght@100..800&display=swap');
+
 .photo-item img {
     width: 100%;
 }
@@ -9,4 +11,29 @@
 }
 .photo-author a {
     font-weight: bold;
+}
+.photo-title {
+    text-align: left;
+    align-items: center;
+    display: flex;
+    margin-bottom: .3em;
+}
+.name-person {
+    font-family: "SUSE", sans-serif;
+    font-weight: 500;
+    font-size: 1.2em;
+}
+#img-profileImage {
+    display: flex;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    margin-right: 0.5em;
+    border-radius: 50%;
+}
+div#userName {
+    margin-top: 0.7em;
+}
+span#title {
+    font-size: 1em;
 }

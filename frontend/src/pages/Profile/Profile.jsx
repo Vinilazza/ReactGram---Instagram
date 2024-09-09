@@ -133,6 +133,9 @@ const Profile = () => {
           <h2>{user.name}</h2>
           <p>{user.bio}</p>
         </div>
+        <div className="perfilEdit">
+          <span className="btn">Editar perfil</span>
+        </div>
       </div>
       {id === userAuth._id && (
         <>
@@ -187,10 +190,12 @@ const Profile = () => {
             photos.map((photo) => (
               <div className="photo" key={photo._id}>
                 {photo.image && (
-                  <img
-                    src={`${uploads}/photos/${photo.image}`}
-                    alt={photo.title}
-                  />
+                  <Link to={`/photos/${photo._id}`}>
+                    <img
+                      src={`${uploads}/photos/${photo.image}`}
+                      alt={photo.title}
+                    />
+                  </Link>
                 )}
                 {id === userAuth._id ? (
                   <div className="actions">

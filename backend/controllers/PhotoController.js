@@ -63,6 +63,35 @@ const deletePhoto = async (req, res) => {
     .json({ id: photo._id, message: "Foto excluída com sucesso." });
 };
 
+const deleteLikePhoto = async (req, res) => {
+  const { id } = req.params;  // ID da foto
+  const reqUser = req.user;    // Usuário que fez a requisição
+
+  const photo = await Photo.findById(id);
+
+  // Verificar se a foto existe
+  if (!photo) {
+    return res.status(404).json({ errors: ["Foto não encontrada!"] });
+  }
+
+  // Verificar se o usuário curtiu a foto
+  if (!photo.likes.includes(reqUser._id)) {
+    return res.status(422).json({ errors: ["Você ainda não curtiu esta foto."] });
+  }
+
+  // Remover o like do usuário (remover userId do array likes)
+  photo.likes = photo.likes.filter(likeId => !likeId.equals(reqUser._id));
+
+  // Salvar a atualização no banco de dados
+  await photo.save();
+
+  return res.status(200).json({ 
+    photoId: id, 
+    userId: reqUser._id, 
+    message: "Like removido com sucesso!" 
+  });
+};
+
 // Get all photos
 const getAllPhotos = async (req, res) => {
   const photos = await Photo.find({})
@@ -87,7 +116,7 @@ const getUserPhotos = async (req, res) => {
 const getPhotoById = async (req, res) => {
   const { id } = req.params;
 
-  const photo = await Photo.findById(mongoose.Types.ObjectId(id));
+  const photo = await Photo.findById(new mongoose.Types.ObjectId(id));
 
   // Check if photo exists
   if (!photo) {
@@ -224,4 +253,5 @@ module.exports = {
   likePhoto,
   commentPhoto,
   searchPhotos,
+  deleteLikePhoto
 };
