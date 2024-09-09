@@ -1,30 +1,22 @@
 import "./LikeContainer.css";
 import { BsHeart, BsHeartFill } from "react-icons/bs";
+import { useEffect } from "react";
 
-const LikeContainer = ({ photo, user, handleLike, handleDislike }) => {
-  // Certifique-se de que photo.likes é um array e user é definido
-  const isLiked = (photo.likes || []).includes(user?._id);
-
-  const handleClick = () => {
-    if (isLiked) {
-      handleDislike(photo); // Chama a função de dislike se já estiver curtido
-    } else {
-      handleLike(photo); // Chama a função de like se não estiver curtido
-    }
-  };
-
+const LikeContainer = ({ photo, user, handleLike }) => {
   return (
-    <div className="like">
-      {(photo.likes || []) && user && (
-        <>
-          {isLiked ? (
-            <BsHeartFill onClick={handleClick} /> // Ícone preenchido para curtir
-          ) : (
-            <BsHeart onClick={handleClick} /> // Ícone vazio para não curtido
-          )}
-          <p>{(photo.likes || []).length} like(s)</p>
-        </>
+    <div className="like-container">
+      {photo.likes && photo.likes.includes(user._id) ? (
+        // Se o usuário já curtiu a foto, mostrar botão de "Descurtir"
+        <button onClick={() => handleLike(photo)}>
+          <i className="fas fa-heart"></i> Descurtir
+        </button>
+      ) : (
+        // Se o usuário ainda não curtiu a foto, mostrar botão de "Curtir"
+        <button onClick={() => handleLike(photo)}>
+          <i className="far fa-heart"></i> Curtir
+        </button>
       )}
+      <p>{photo.likes ? photo.likes.length : 0} curtidas</p>
     </div>
   );
 };

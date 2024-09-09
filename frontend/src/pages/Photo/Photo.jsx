@@ -39,10 +39,6 @@ const Photo = () => {
     resetMessage();
   };
 
-  const handleDislike = (photo) => {
-    dispatch(unlikePhoto(photo._id));
-    resetMessage();
-  };
   // LIKE E comentarios
 
   const handleComment = (e) => {
@@ -65,12 +61,7 @@ const Photo = () => {
 
   return (
     <div id="photo">
-      <PhotoItem
-        photo={photo}
-        user={user}
-        handleLike={handleLike}
-        handleDislike={handleDislike}
-      />
+      <PhotoItem photo={photo} user={user} handleLike={handleLike} />
       <div className="message-container">
         {error && <Message msg={error} type="error" />}
         {message && <Message msg={message} type="success" />}

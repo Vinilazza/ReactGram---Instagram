@@ -126,20 +126,6 @@ const searchPhotos = async (query, token) => {
   }
 };
 
-//Unlike a photo
-const unlikePhoto = async (id, token) => {
-  const config = requestConfig("PUT", null, token);
-
-  try {
-    const res = await fetch(api + "/photos/" + id + "/unlike", config)
-      .then((res) => res.json())
-      .catch((err) => err);
-    return res;
-  } catch (error) {
-    console.log(error);
-  }
-};
-
 const photoService = {
   publishPhoto,
   getUserPhotos,
@@ -150,7 +136,6 @@ const photoService = {
   comment,
   getPhotos,
   searchPhotos,
-  unlikePhoto,
 };
 
 export default photoService;

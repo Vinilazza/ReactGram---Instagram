@@ -7,7 +7,7 @@ import { useEffect } from "react";
 import DataPost from "./DataPost";
 import LikeContainer from "./LikeContainer";
 
-const PhotoItem = ({ photo, user, handleLike, handleDislike }) => {
+const PhotoItem = ({ photo, user, handleLike }) => {
   const dispatch = useDispatch();
 
   const { user: usuario } = useSelector((state) => state.user);
@@ -40,12 +40,7 @@ const PhotoItem = ({ photo, user, handleLike, handleDislike }) => {
           <img src={`${uploads}/photos/${photo.image}`} alt={photo.title} />
         </Link>
       )}
-      <LikeContainer
-        user={user}
-        photo={photo}
-        handleLike={handleLike}
-        handleDislike={handleDislike}
-      />
+      <LikeContainer photo={photo} user={usuario} handleLike={handleLike} />
       <div id="userName">
         <span>
           <b>

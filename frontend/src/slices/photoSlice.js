@@ -132,20 +132,6 @@ export const searchPhotos = createAsyncThunk(
     return data;
   }
 );
-//Unlike photo
-export const unlikePhoto = createAsyncThunk(
-  "photo/unlike",
-  async (id, thunkAPI) => {
-    const token = thunkAPI.getState().auth.user.token;
-
-    const data = await photoService.unlikePhoto(id, token);
-    // Check for errors
-    if (data.errors) {
-      return thunkAPI.rejectWithValue(data.errors[0]);
-    }
-    return data;
-  }
-);
 
 export const photoSlice = createSlice({
   name: "publish",
@@ -236,20 +222,24 @@ export const photoSlice = createSlice({
         state.photo = action.payload;
       })
       .addCase(like.fulfilled, (state, action) => {
-        state.loading = false;
-        state.success = true;
-        state.error = null;
-        if (state.photo.likes) {
-          state.photo.likes.push(action.payload.userId);
+        const updatedPhoto = action.payload;
+
+        // Atualizar o estado da foto no array de fotos
+        state.photos = state.photos.map((photo) =>
+          photo._id === updatedPhoto._id
+            ? { ...photo, likes: updatedPhoto.likes }
+            : photo
+        );
+
+        // Se for a foto individual carregada no estado, atualize-a também
+        if (state.photo._id === updatedPhoto._id) {
+          state.photo.likes = updatedPhoto.likes;
         }
-        state.photos.map((photo) => {
-          if (photo._id === action.payload.photoId) {
-            return photo.likes.push(action.payload.userId);
-          }
-          return photo;
-        });
-        state.message = action.payload.message;
+
+        state.success = true;
+        state.message = "Foto curtida com sucesso!";
       })
+
       .addCase(like.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
@@ -286,36 +276,6 @@ export const photoSlice = createSlice({
         state.success = true;
         state.error = null;
         state.photos = action.payload;
-      })
-      .addCase(unlikePhoto.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(unlikePhoto.fulfilled, (state, action) => {
-        state.loading = false;
-        state.success = true;
-        state.error = null;
-
-        if (state.photo.likes) {
-          state.photo.likes = state.photo.likes.filter(
-            (id) => id !== action.payload.userId
-          );
-        }
-        state.photos.map((photo) => {
-          if (photo._id === action.payload.photoId) {
-            photo.likes = photo.likes.filter(
-              (id) => id !== action.payload.userId
-            );
-          }
-          return photo;
-        });
-
-        state.message = action.payload.message;
-      })
-      .addCase(unlikePhoto.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-        state.photo = null;
       });
   },
 });

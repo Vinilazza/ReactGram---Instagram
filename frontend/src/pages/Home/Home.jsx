@@ -11,30 +11,30 @@ import { useResetComponentMessage } from "../../hooks/useResetComponent";
 
 // Redux
 
-import { getPhotos, like, unlikePhoto } from "../../slices/photoSlice";
+import { getPhotos, like } from "../../slices/photoSlice";
 
 const Home = () => {
   const dispatch = useDispatch();
   const resetMessage = useResetComponentMessage(dispatch);
 
   const { user } = useSelector((state) => state.auth);
-  const { photos, loading } = useSelector((state) => state.photo);
+  const { photos, loading, success } = useSelector((state) => state.photo);
 
   //Load all photos
   useEffect(() => {
     dispatch(getPhotos());
   }, [dispatch]);
 
+  // Recarrega as fotos após sucesso no like/dislike
+  useEffect(() => {
+    if (success) {
+      dispatch(getPhotos());
+    }
+  }, [dispatch, success]);
+
   // Like a photo
   const handleLike = (photo) => {
     dispatch(like(photo._id));
-
-    resetMessage();
-  };
-
-  const handleDislike = (photo) => {
-    dispatch(unlikePhoto(photo._id));
-    resetMessage();
   };
 
   if (loading) {
@@ -46,12 +46,7 @@ const Home = () => {
       {photos &&
         photos.map((photo) => (
           <div key={photo._id}>
-            <Photoitem
-              photo={photo}
-              user={user}
-              handleLike={handleLike}
-              handleDislike={handleDislike}
-            />
+            <Photoitem photo={photo} user={user} handleLike={handleLike} />
             <Link className="btn" to={`/photos/${photo._id}`}>
               Ver mais
             </Link>

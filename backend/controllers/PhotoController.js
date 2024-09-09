@@ -62,36 +62,6 @@ const deletePhoto = async (req, res) => {
     .status(200)
     .json({ id: photo._id, message: "Foto excluída com sucesso." });
 };
-
-const deleteLikePhoto = async (req, res) => {
-  const { id } = req.params;  // ID da foto
-  const reqUser = req.user;    // Usuário que fez a requisição
-
-  const photo = await Photo.findById(id);
-
-  // Verificar se a foto existe
-  if (!photo) {
-    return res.status(404).json({ errors: ["Foto não encontrada!"] });
-  }
-
-  // Verificar se o usuário curtiu a foto
-  if (!photo.likes.includes(reqUser._id)) {
-    return res.status(422).json({ errors: ["Você ainda não curtiu esta foto."] });
-  }
-
-  // Remover o like do usuário (remover userId do array likes)
-  photo.likes = photo.likes.filter(likeId => !likeId.equals(reqUser._id));
-
-  // Salvar a atualização no banco de dados
-  await photo.save();
-
-  return res.status(200).json({ 
-    photoId: id, 
-    userId: reqUser._id, 
-    message: "Like removido com sucesso!" 
-  });
-};
-
 // Get all photos
 const getAllPhotos = async (req, res) => {
   const photos = await Photo.find({})
@@ -172,31 +142,37 @@ const updatePhoto = async (req, res) => {
 // Like functionality
 const likePhoto = async (req, res) => {
   const { id } = req.params;
-
   const reqUser = req.user;
 
   const photo = await Photo.findById(id);
 
-  // Check if photo exists
+  // Verificar se a foto existe
   if (!photo) {
-    res.status(404).json({ errors: ["Foto não encontrada!"] });
-    return;
+    return res.status(404).json({ errors: ["Foto não encontrada!"] });
   }
 
-  // Check if user already liked the photo
-  if (photo.likes.includes(reqUser._id)) {
-    res.status(422).json({ errors: ["Você já curtiu esta foto."] });
-    return;
+  // Verificar se o usuário já curtiu a foto
+  const alreadyLiked = photo.likes.includes(reqUser._id);
+
+  if (alreadyLiked) {
+    // Se já curtiu, remover o like (deslike)
+    photo.likes = photo.likes.filter((likeId) => !likeId.equals(reqUser._id));
+    await photo.save();
+    return res.status(200).json({
+      photoId: id,
+      userId: reqUser._id,
+      message: "Like removido com sucesso!",
+    });
+  } else {
+    // Se não curtiu, adicionar o like
+    photo.likes.push(reqUser._id);
+    await photo.save();
+    return res.status(200).json({
+      photoId: id,
+      userId: reqUser._id,
+      message: "A foto foi curtida!",
+    });
   }
-
-  // Put user id in array of likes
-  photo.likes.push(reqUser._id);
-
-  await photo.save();
-
-  res
-    .status(200)
-    .json({ photoId: id, userId: reqUser._id, message: "A foto foi curtida!" });
 };
 
 // Comment functionality
@@ -253,5 +229,4 @@ module.exports = {
   likePhoto,
   commentPhoto,
   searchPhotos,
-  deleteLikePhoto
 };

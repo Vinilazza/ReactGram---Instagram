@@ -48,8 +48,6 @@ router.put(
   validate,
   updatePhoto
 );
-router.put('/:id/unlike', authGuard, deleteLikePhoto);
-
 router.put("/like/:id", authGuard, likePhoto);
 router.put(
   "/comment/:id",
