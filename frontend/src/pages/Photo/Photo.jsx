@@ -10,8 +10,15 @@ import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useResetComponentMessage } from "../../hooks/useResetComponent";
-import { getPhoto, like, comment, unlikePhoto } from "../../slices/photoSlice";
+import {
+  getPhoto,
+  like,
+  comment,
+  editComment,
+  deleteComment,
+} from "../../slices/photoSlice";
 import PhotoItem from "../../components/PhotoItem";
+import Loading from "../../components/Loading";
 
 const Photo = () => {
   const { id } = useParams();
@@ -28,7 +35,6 @@ const Photo = () => {
 
   //comentarios
   const [commentText, setCommentText] = useState("");
-
   //load photo data
   useEffect(() => {
     dispatch(getPhoto(id));
@@ -57,8 +63,24 @@ const Photo = () => {
   };
 
   if (loading) {
-    return <p>Carregando...</p>;
+    return <Loading />;
   }
+
+  const handleEditComment = () => {
+    const commentData = {
+      comment: commentText,
+      id: photo._id,
+    };
+    dispatch(editComment(commentData));
+  };
+
+  const handleDeleteComment = () => {
+    const commentData = {
+      commentId: user._id,
+      id: photo._id,
+    };
+    dispatch(deleteComment(commentData));
+  };
 
   return (
     <div id="photo">
@@ -95,6 +117,16 @@ const Photo = () => {
                   </Link>
                 </div>
                 <p>{comment.comment}</p>
+                {comment.userId === user._id && (
+                  <div className="comment-actions">
+                    <button onClick={() => handleEditComment(comment._id)}>
+                      Editar
+                    </button>
+                    <button onClick={() => handleDeleteComment(comment._id)}>
+                      Excluir
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
           </>

@@ -13,6 +13,8 @@ const {
   commentPhoto,
   searchPhotos,
   deleteLikePhoto,
+  editComment,
+  deleteComment,
 } = require("../controllers/PhotoController");
 
 // Middlewares
@@ -49,6 +51,14 @@ router.put(
   updatePhoto
 );
 router.put("/like/:id", authGuard, likePhoto);
+router.put(
+  "/comment/edit/:id",
+  authGuard,
+  commentValidation(),
+  validate,
+  editComment
+);
+router.delete("/comment/delete/:id", authGuard, deleteComment);
 router.put(
   "/comment/:id",
   authGuard,

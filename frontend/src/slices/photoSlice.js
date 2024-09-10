@@ -132,6 +132,39 @@ export const searchPhotos = createAsyncThunk(
     return data;
   }
 );
+export const editComment = createAsyncThunk(
+  "photo/comment/edit",
+  async (commentData, thunkAPI) => {
+    const token = thunkAPI.getState().auth.user.token;
+
+    const data = await photoService.editComment(
+      { comment: commentData.comment },
+      commentData.id,
+      token
+    );
+    // Check for errors
+    if (data.errors) {
+      return thunkAPI.rejectWithValue(data.errors[0]);
+    }
+    return data;
+  }
+);
+export const deleteComment = createAsyncThunk(
+  "photo/comment/delete",
+  async (commentData, thunkAPI) => {
+    const token = thunkAPI.getState().auth.user.token;
+
+    console.log(commentData);
+    let id = commentData.id;
+    let commentId = commentData.commentId;
+    const data = await photoService.deleteComment(id, commentId, token);
+    // Check for errors
+    if (data.errors) {
+      return thunkAPI.rejectWithValue(data.errors[0]);
+    }
+    return data;
+  }
+);
 
 export const photoSlice = createSlice({
   name: "publish",
@@ -276,6 +309,50 @@ export const photoSlice = createSlice({
         state.success = true;
         state.error = null;
         state.photos = action.payload;
+      })
+      .addCase(editComment.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = true;
+        state.error = null;
+
+        const updatedComment = action.payload.comment;
+
+        // Atualize o comentário no array de comentários da foto
+        state.photo.comments = state.photo.comments.map((comment) =>
+          comment._id === updatedComment._id ? updatedComment : comment
+        );
+
+        state.message = action.payload.message;
+      })
+
+      .addCase(editComment.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(deleteComment.fulfilled, (state, action) => {
+        const updatedPhoto = action.payload.photo; // Foto atualizada do backend
+
+        // Atualiza a foto no array de fotos se estiver no estado
+        state.photos = state.photos.map((photo) =>
+          photo._id === updatedPhoto._id
+            ? { ...photo, comments: updatedPhoto.comments }
+            : photo
+        );
+
+        // Atualiza também a foto individual carregada no estado, se for a mesma
+        if (state.photo._id === updatedPhoto._id) {
+          state.photo.comments = updatedPhoto.comments;
+        }
+
+        state.loading = false;
+        state.success = true;
+        state.error = null;
+        state.message = action.payload.message; // Exibe a mensagem de sucesso
+      })
+
+      .addCase(deleteComment.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   },
 });

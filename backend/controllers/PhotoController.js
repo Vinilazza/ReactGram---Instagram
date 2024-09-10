@@ -198,6 +198,7 @@ const commentPhoto = async (req, res) => {
     userName: user.name,
     userImage: user.profileImage,
     userId: user._id,
+    createdAt: Date.now(),
   };
 
   photo.comments.push(userComment);
@@ -207,6 +208,78 @@ const commentPhoto = async (req, res) => {
   res.status(200).json({
     comment: userComment,
     message: "Comentário adicionado com sucesso!",
+  });
+};
+//Edit comment photo
+const editComment = async (req, res) => {
+  const { id, commentId } = req.params;
+  const { comment } = req.body;
+
+  const reqUser = req.user;
+
+  const user = await User.findById(reqUser._id);
+
+  const photo = await Photo.findById(id);
+
+  // Check if photo exists
+  if (!photo) {
+    res.status(404).json({ errors: ["Foto não encontrada!"] });
+    return;
+  }
+
+  // Put comment in the array of comments
+  const userComment = photo.comments.id(commentId);
+
+  if (!userComment) {
+    return res.status(404).json({ errors: ["Comentário não encontrado!"] });
+  }
+  if (userComment.userId.toString() !== reqUser._id.toString()) {
+    return res.status(403).json({
+      errors: ["Você não tem permissão para editar este comentário!"],
+    });
+  }
+
+  userComment.comment = comment;
+
+  await photo.save();
+
+  res.status(200).json({
+    comment: userComment,
+    message: "Comentário editado com sucesso!",
+  });
+};
+//Edit comment photo
+const deleteComment = async (req, res) => {
+  const { id, commentId } = req.params;
+
+  const reqUser = req.user;
+
+  const photo = await Photo.findById(id);
+
+  // Verifique se a foto existe
+  if (!photo) {
+    return res.status(404).json({ errors: ["Foto não encontrada!"] });
+  }
+
+  // Verifique se o comentário existe
+  const userComment = photo.comments.find(
+    (comment) => comment._id === commentId
+  );
+
+  if (!userComment) {
+    return res.status(404).json({ errors: ["Comentário não encontrado!"] });
+  }
+
+  // Remova o comentário
+  photo.comments = photo.comments.filter(
+    (comment) => comment._id !== commentId
+  );
+
+  await photo.save();
+
+  res.status(200).json({
+    photo,
+    message: "Comentário excluído com sucesso!",
   });
 };
 
@@ -229,4 +302,6 @@ module.exports = {
   likePhoto,
   commentPhoto,
   searchPhotos,
+  deleteComment,
+  editComment,
 };
