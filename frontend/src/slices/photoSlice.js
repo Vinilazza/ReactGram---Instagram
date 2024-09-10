@@ -134,21 +134,22 @@ export const searchPhotos = createAsyncThunk(
 );
 export const editComment = createAsyncThunk(
   "photo/comment/edit",
-  async (commentData, thunkAPI) => {
+  async ({ comment, commentId, photoId }, thunkAPI) => {
     const token = thunkAPI.getState().auth.user.token;
 
     const data = await photoService.editComment(
-      { comment: commentData.comment },
-      commentData.id,
+      { comment, commentId },
+      photoId,
       token
     );
-    // Check for errors
+
     if (data.errors) {
       return thunkAPI.rejectWithValue(data.errors[0]);
     }
     return data;
   }
 );
+
 export const deleteComment = createAsyncThunk(
   "photo/comment/delete",
   async (commentData, thunkAPI) => {
@@ -310,21 +311,23 @@ export const photoSlice = createSlice({
         state.error = null;
         state.photos = action.payload;
       })
+      .addCase(editComment.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(editComment.fulfilled, (state, action) => {
         state.loading = false;
         state.success = true;
         state.error = null;
 
+        // Atualiza o comentário na foto
         const updatedComment = action.payload.comment;
-
-        // Atualize o comentário no array de comentários da foto
         state.photo.comments = state.photo.comments.map((comment) =>
           comment._id === updatedComment._id ? updatedComment : comment
         );
 
         state.message = action.payload.message;
       })
-
       .addCase(editComment.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;

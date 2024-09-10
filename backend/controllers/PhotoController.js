@@ -213,42 +213,52 @@ const commentPhoto = async (req, res) => {
 };
 //Edit comment photo
 const editComment = async (req, res) => {
-  const { id, commentId } = req.params;
-  const { comment } = req.body;
+  const { id } = req.params; // ID da foto
+  const { comment, commentId } = req.body; // Novo texto do comentário e ID do comentário
 
-  const reqUser = req.user;
+  try {
+    const reqUser = req.user; // Usuário autenticado
 
-  const user = await User.findById(reqUser._id);
+    // Encontrar a foto pelo ID
+    const photo = await Photo.findById(id);
 
-  const photo = await Photo.findById(id);
+    // Verificar se a foto existe
+    if (!photo) {
+      return res.status(404).json({ errors: ["Foto não encontrada!"] });
+    }
 
-  // Check if photo exists
-  if (!photo) {
-    res.status(404).json({ errors: ["Foto não encontrada!"] });
-    return;
-  }
+    // Encontrar o comentário pelo ID dentro da foto
+    const userComment = photo.comments.id(commentId);
 
-  // Put comment in the array of comments
-  const userComment = photo.comments.id(commentId);
+    // Verificar se o comentário existe
+    if (!userComment) {
+      return res.status(404).json({ errors: ["Comentário não encontrado!"] });
+    }
 
-  if (!userComment) {
-    return res.status(404).json({ errors: ["Comentário não encontrado!"] });
-  }
-  if (userComment.userId !== reqUser._id) {
-    return res.status(403).json({
-      errors: ["Você não tem permissão para editar este comentário!"],
+    // Verificar se o usuário é o autor do comentário (opcional)
+    // if (userComment.userId.toString() !== reqUser._id.toString()) {
+    //   return res.status(403).json({ errors: ["Você não tem permissão para editar este comentário!"] });
+    // }
+
+    // Atualizar o comentário
+    userComment.comment = comment;
+
+    // Salvar a foto com o comentário atualizado
+    await photo.save();
+
+    // Enviar resposta de sucesso
+    res.status(200).json({
+      comment: userComment,
+      message: "Comentário editado com sucesso!",
     });
+  } catch (error) {
+    // Enviar resposta de erro em caso de exceção
+    res
+      .status(500)
+      .json({ errors: [error.message || "Erro ao editar comentário"] });
   }
-
-  userComment.comment = comment;
-
-  await photo.save();
-
-  res.status(200).json({
-    comment: userComment,
-    message: "Comentário editado com sucesso!",
-  });
 };
+
 const deleteComment = async (req, res) => {
   const { id: photoId } = req.params; // ID da foto da URL
   const { commentId } = req.body; // ID do comentário no corpo da requisição

@@ -15,6 +15,7 @@ import {
 } from "../../slices/photoSlice";
 import PhotoItem from "../../components/PhotoItem";
 import Loading from "../../components/Loading";
+import EditCommentModal from "../../components/EditCommentModal";
 
 const Photo = () => {
   const { id } = useParams();
@@ -29,6 +30,8 @@ const Photo = () => {
 
   //comentarios
   const [commentText, setCommentText] = useState("");
+  const [editingComment, setEditingComment] = useState(null); // Para armazenar o comentário que está sendo editado
+  const [isModalOpen, setIsModalOpen] = useState(false); // Controla a visibilidade do modal
 
   //load photo data
   useEffect(() => {
@@ -59,6 +62,23 @@ const Photo = () => {
       id: photo._id, // Passa o ID da foto para o backend
     };
     dispatch(deleteComment(commentData));
+  };
+
+  const handleEditClick = (comment) => {
+    setEditingComment(comment);
+    setIsModalOpen(true);
+  };
+
+  const handleSaveComment = (newCommentText) => {
+    if (editingComment) {
+      dispatch(
+        editComment({
+          commentId: editingComment._id,
+          comment: newCommentText,
+          id: photo._id,
+        })
+      );
+    }
   };
 
   if (loading) {
@@ -102,9 +122,10 @@ const Photo = () => {
                 <p>{comment.comment}</p>
                 {comment.userId === user._id && (
                   <div className="comment-actions">
-                    <button
-                      onClick={() => handleDeleteComment(comment.commentId)}
-                    >
+                    <button onClick={() => handleEditClick(comment)}>
+                      Editar
+                    </button>
+                    <button onClick={() => handleDeleteComment(comment._id)}>
                       Excluir
                     </button>
                   </div>
@@ -114,6 +135,12 @@ const Photo = () => {
           </>
         )}
       </div>
+      <EditCommentModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleSaveComment}
+        initialComment={editingComment ? editingComment.comment : ""}
+      />
     </div>
   );
 };
