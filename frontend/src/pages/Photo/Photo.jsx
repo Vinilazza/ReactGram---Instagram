@@ -1,12 +1,8 @@
 import "./Photo.css";
-
 import { uploads } from "../../utils/config";
 import { useParams } from "react-router-dom";
-
-//COMPONENS
 import Message from "../../components/Message";
 import { Link } from "react-router-dom";
-
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useResetComponentMessage } from "../../hooks/useResetComponent";
@@ -22,9 +18,7 @@ import Loading from "../../components/Loading";
 
 const Photo = () => {
   const { id } = useParams();
-
   const dispatch = useDispatch();
-
   const resetMessage = useResetComponentMessage(dispatch);
 
   const { user } = useSelector((state) => state.auth);
@@ -35,6 +29,7 @@ const Photo = () => {
 
   //comentarios
   const [commentText, setCommentText] = useState("");
+
   //load photo data
   useEffect(() => {
     dispatch(getPhoto(id));
@@ -42,11 +37,8 @@ const Photo = () => {
 
   const handleLike = (photo) => {
     dispatch(like(photo._id));
-
     resetMessage();
   };
-
-  // LIKE E comentarios
 
   const handleComment = (e) => {
     e.preventDefault();
@@ -58,30 +50,20 @@ const Photo = () => {
 
     dispatch(comment(commentData));
     setCommentText("");
-
     resetMessage();
-  };
-
-  if (loading) {
-    return <Loading />;
-  }
-
-  console.log(comment);
-  const handleEditComment = () => {
-    const commentData = {
-      comment,
-      id: photo._id,
-    };
-    dispatch(editComment(commentData));
   };
 
   const handleDeleteComment = (commentId) => {
     const commentData = {
       commentId,
-      id: photo._id,
+      id: photo._id, // Passa o ID da foto para o backend
     };
     dispatch(deleteComment(commentData));
   };
+
+  if (loading) {
+    return <Loading />;
+  }
 
   return (
     <div id="photo">
@@ -103,9 +85,9 @@ const Photo = () => {
               />
               <input type="submit" value="Enviar" />
             </form>
-            {photo.comments.length === 0 && <p>Não há comentarios</p>}
+            {photo.comments.length === 0 && <p>Não há comentários</p>}
             {photo.comments.map((comment) => (
-              <div className="comment" key={comment.comment}>
+              <div className="comment" key={comment.commentId}>
                 <div className="author">
                   {comment.userImage && (
                     <img
@@ -120,10 +102,9 @@ const Photo = () => {
                 <p>{comment.comment}</p>
                 {comment.userId === user._id && (
                   <div className="comment-actions">
-                    <button onClick={() => handleEditComment(comment._id)}>
-                      Editar
-                    </button>
-                    <button onClick={() => handleDeleteComment(comment._id)}>
+                    <button
+                      onClick={() => handleDeleteComment(comment.commentId)}
+                    >
                       Excluir
                     </button>
                   </div>

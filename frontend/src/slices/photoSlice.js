@@ -329,30 +329,28 @@ export const photoSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      .addCase(deleteComment.fulfilled, (state, action) => {
-        const updatedPhoto = action.payload.photo; // Foto atualizada do backend
-
-        // Atualiza a foto no array de fotos se estiver no estado
-        state.photos = state.photos.map((photo) =>
-          photo._id === updatedPhoto._id
-            ? { ...photo, comments: updatedPhoto.comments }
-            : photo
-        );
-
-        // Atualiza também a foto individual carregada no estado, se for a mesma
-        if (state.photo._id === updatedPhoto._id) {
-          state.photo.comments = updatedPhoto.comments;
-        }
-
-        state.loading = false;
-        state.success = true;
+      .addCase(deleteComment.pending, (state) => {
+        state.loading = true;
         state.error = null;
-        state.message = action.payload.message; // Exibe a mensagem de sucesso
+      })
+      .addCase(deleteComment.fulfilled, (state, action) => {
+        state.loading = false;
+
+        // Atualiza os comentários da foto sem fazer reload
+        const updatedPhoto = action.payload.photo;
+
+        // Mantém o restante das propriedades da foto no estado
+        state.photo = {
+          ...state.photo,
+          comments: updatedPhoto.comments,
+        };
+
+        state.message = "Comentário excluído com sucesso!";
       })
 
       .addCase(deleteComment.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.payload || "Erro ao deletar comentário";
       });
   },
 });

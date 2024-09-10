@@ -234,7 +234,7 @@ const editComment = async (req, res) => {
   if (!userComment) {
     return res.status(404).json({ errors: ["Comentário não encontrado!"] });
   }
-  if (userComment.userId.toString() !== reqUser._id.toString()) {
+  if (userComment.userId !== reqUser._id) {
     return res.status(403).json({
       errors: ["Você não tem permissão para editar este comentário!"],
     });
@@ -249,43 +249,39 @@ const editComment = async (req, res) => {
     message: "Comentário editado com sucesso!",
   });
 };
-//Edit comment photo
 const deleteComment = async (req, res) => {
-  const { id, commentId } = req.params;
+  const { id: photoId } = req.params; // ID da foto da URL
+  const { commentId } = req.body; // ID do comentário no corpo da requisição
 
   try {
-    // Encontrar a foto
-    const photo = await Photo.findById(id);
-
     // Verificar se a foto existe
+    const photo = await Photo.findById(photoId);
     if (!photo) {
-      return res.status(404).json({ errors: ["Foto não encontrada!"] });
+      return res.status(404).json({ message: "Foto não encontrada" });
     }
 
-    // Encontrar o índice do comentário
+    // Encontrar o índice do comentário a ser removido
     const commentIndex = photo.comments.findIndex(
-      (comment) => comment._id === commentId
+      (comment) => comment.commentId.toString() === commentId
     );
 
     // Verificar se o comentário existe
     if (commentIndex === -1) {
-      return res.status(404).json({ errors: ["Comentário não encontrado!"] });
+      return res.status(404).json({ message: "Comentário não encontrado" });
     }
 
-    // Remover o comentário
+    // Remover o comentário do array
     photo.comments.splice(commentIndex, 1);
 
-    // Salvar a foto
+    // Salvar a atualização
     await photo.save();
 
-    // Retornar resposta de sucesso
-    res.status(200).json({
-      photo,
-      message: "Comentário excluído com sucesso!",
-    });
+    res
+      .status(200)
+      .json({ photo, message: "Comentário excluído com sucesso!" });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ errors: ["Erro no servidor."] });
+    console.error("Erro ao excluir comentário:", error);
+    res.status(500).json({ error: "Erro ao excluir o comentário" });
   }
 };
 
