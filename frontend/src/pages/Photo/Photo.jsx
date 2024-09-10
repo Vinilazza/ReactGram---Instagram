@@ -66,17 +66,18 @@ const Photo = () => {
     return <Loading />;
   }
 
+  console.log(comment);
   const handleEditComment = () => {
     const commentData = {
-      comment: commentText,
+      comment,
       id: photo._id,
     };
     dispatch(editComment(commentData));
   };
 
-  const handleDeleteComment = () => {
+  const handleDeleteComment = (commentId) => {
     const commentData = {
-      commentId: user._id,
+      commentId,
       id: photo._id,
     };
     dispatch(deleteComment(commentData));

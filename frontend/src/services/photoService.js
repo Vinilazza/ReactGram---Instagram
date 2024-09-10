@@ -110,7 +110,7 @@ const editComment = async (data, id, token) => {
   }
 };
 const deleteComment = async (id, commentId, token) => {
-  const config = requestConfig("DELETE", commentId, token);
+  const config = requestConfig("PUT", commentId, token);
 
   try {
     const res = await fetch(api + "/photos/comment/delete/" + id, config)

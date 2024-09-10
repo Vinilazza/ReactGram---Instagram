@@ -58,7 +58,7 @@ router.put(
   validate,
   editComment
 );
-router.delete("/comment/delete/:id", authGuard, deleteComment);
+router.put("/comment/delete/:id", authGuard, deleteComment);
 router.put(
   "/comment/:id",
   authGuard,

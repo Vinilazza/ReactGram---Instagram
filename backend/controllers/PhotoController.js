@@ -194,11 +194,12 @@ const commentPhoto = async (req, res) => {
 
   // Put comment in the array of comments
   const userComment = {
+    commentId: mongoose.Types.ObjectId(),
     comment,
     userName: user.name,
     userImage: user.profileImage,
     userId: user._id,
-    createdAt: Date.now(),
+    createdCommentAt: Date.now(),
   };
 
   photo.comments.push(userComment);
@@ -252,35 +253,40 @@ const editComment = async (req, res) => {
 const deleteComment = async (req, res) => {
   const { id, commentId } = req.params;
 
-  const reqUser = req.user;
+  try {
+    // Encontrar a foto
+    const photo = await Photo.findById(id);
 
-  const photo = await Photo.findById(id);
+    // Verificar se a foto existe
+    if (!photo) {
+      return res.status(404).json({ errors: ["Foto não encontrada!"] });
+    }
 
-  // Verifique se a foto existe
-  if (!photo) {
-    return res.status(404).json({ errors: ["Foto não encontrada!"] });
+    // Encontrar o índice do comentário
+    const commentIndex = photo.comments.findIndex(
+      (comment) => comment._id === commentId
+    );
+
+    // Verificar se o comentário existe
+    if (commentIndex === -1) {
+      return res.status(404).json({ errors: ["Comentário não encontrado!"] });
+    }
+
+    // Remover o comentário
+    photo.comments.splice(commentIndex, 1);
+
+    // Salvar a foto
+    await photo.save();
+
+    // Retornar resposta de sucesso
+    res.status(200).json({
+      photo,
+      message: "Comentário excluído com sucesso!",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ errors: ["Erro no servidor."] });
   }
-
-  // Verifique se o comentário existe
-  const userComment = photo.comments.find(
-    (comment) => comment._id === commentId
-  );
-
-  if (!userComment) {
-    return res.status(404).json({ errors: ["Comentário não encontrado!"] });
-  }
-
-  // Remova o comentário
-  photo.comments = photo.comments.filter(
-    (comment) => comment._id !== commentId
-  );
-
-  await photo.save();
-
-  res.status(200).json({
-    photo,
-    message: "Comentário excluído com sucesso!",
-  });
 };
 
 // Search a photo by title
