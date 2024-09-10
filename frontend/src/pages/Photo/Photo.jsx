@@ -24,6 +24,7 @@ const Photo = () => {
   const { photo, loading, error, message } = useSelector(
     (state) => state.photo
   );
+  resetMessage();
 
   //comentarios
   const [commentText, setCommentText] = useState("");

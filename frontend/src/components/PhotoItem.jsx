@@ -40,7 +40,7 @@ const PhotoItem = ({ photo, user, handleLike }) => {
           <img src={`${uploads}/photos/${photo.image}`} alt={photo.title} />
         </Link>
       )}
-      <LikeContainer photo={photo} user={usuario} handleLike={handleLike} />
+      <LikeContainer photo={photo} user={user} handleLike={handleLike} />
       <div id="userName">
         <span>
           <b>

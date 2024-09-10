@@ -14,9 +14,12 @@ function DataPost({ timestamp }) {
       const hours = Math.floor(minutes / 60);
       const days = Math.floor(hours / 24);
 
-      if (days > 0) {
-        setTimeAgo(`postado   
- há ${days} dias`);
+      if (days === 1) {
+        setTimeAgo(`Há ${days} dia`);
+      } else if (days > 0) {
+        setTimeAgo(`Há ${days} dias`);
+      } else if (days === 1) {
+        setTimeAgo(`Há ${days} dia`);
       } else if (hours === 1) {
         setTimeAgo(`Há ${hours} hora`);
       } else if (hours > 1) {

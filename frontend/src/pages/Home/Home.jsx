@@ -25,13 +25,6 @@ const Home = () => {
     dispatch(getPhotos());
   }, [dispatch]);
 
-  // Recarrega as fotos após sucesso no like/dislike
-  useEffect(() => {
-    if (success) {
-      dispatch(getPhotos());
-    }
-  }, [dispatch, success]);
-
   // Like a photo
   const handleLike = (photo) => {
     dispatch(like(photo._id));

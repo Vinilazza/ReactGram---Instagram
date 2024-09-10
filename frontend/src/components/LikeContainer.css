@@ -15,3 +15,10 @@
 .like p {
     margin-left: 1em;
 }
+.likesCount {
+    margin-right: 3px;
+}
+button.like-button {
+    border: none;
+    background-color: transparent;
+}
