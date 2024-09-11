@@ -8,6 +8,8 @@ const userSchema = new Schema(
     password: String,
     profileImage: String,
     bio: String,
+    following: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    followers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   },
   {
     timestamps: true,

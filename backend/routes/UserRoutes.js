@@ -8,6 +8,10 @@ const {
   login,
   update,
   getUserById,
+  followUser,
+  unfollowUser,
+  getFollowing,
+  getFollowers,
 } = require("../controllers/UserController");
 
 // Middlewares
@@ -33,5 +37,8 @@ router.put(
   update
 );
 router.get("/:id", getUserById);
-
+router.post("/follow/:id", authGuard, followUser);
+router.post("/unfollow/:id", authGuard, unfollowUser);
+router.get("/following", authGuard, getFollowing);
+router.get("/followers", authGuard, getFollowers);
 module.exports = router;

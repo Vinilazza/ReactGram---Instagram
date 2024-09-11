@@ -138,6 +138,73 @@ const getUserById = async (req, res) => {
 
   res.status(200).json(user);
 };
+const followUser = async (req, res) => {
+  try {
+    const userToFollow = await User.findById(req.params.id);
+    const { userId } = req.body;
+    const currentUser = await User.findById(userId);
+
+    if (!userToFollow || !currentUser) {
+      return res.status(404).json({ message: "Usuário não encontrado" });
+    }
+
+    if (currentUser.following.includes(userToFollow._id)) {
+      return res.status(400).json({ message: "Já está seguindo este usuário" });
+    }
+
+    currentUser.following.push(userToFollow._id);
+    userToFollow.followers.push(currentUser._id);
+
+    await currentUser.save();
+    await userToFollow.save();
+
+    res.status(200).json({ message: "Usuário seguido com sucesso" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+const unfollowUser = async (req, res) => {
+  try {
+    const userToUnfollow = await User.findById(req.params.id);
+    const currentUser = await User.findById(req.userId);
+
+    if (!userToUnfollow || !currentUser) {
+      return res.status(404).json({ message: "Usuário não encontrado" });
+    }
+
+    if (!currentUser.following.includes(userToUnfollow._id)) {
+      return res
+        .status(400)
+        .json({ message: "Não está seguindo este usuário" });
+    }
+
+    currentUser.following.pull(userToUnfollow._id);
+    userToUnfollow.followers.pull(currentUser._id);
+
+    await currentUser.save();
+    await userToUnfollow.save();
+
+    res.status(200).json({ message: "Usuário deixado de seguir com sucesso" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+const getFollowers = async (req, res) => {
+  try {
+    const user = await User.findById(req.userId).populate("followers");
+    res.status(200).json(user.followers);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+const getFollowing = async (req, res) => {
+  try {
+    const user = await User.findById(req.userId).populate("following");
+    res.status(200).json(user.following);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
 module.exports = {
   register,
@@ -145,4 +212,8 @@ module.exports = {
   login,
   update,
   getUserById,
+  followUser,
+  unfollowUser,
+  getFollowers,
+  getFollowing,
 };

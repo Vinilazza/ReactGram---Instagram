@@ -9,7 +9,11 @@ import { useParams } from "react-router-dom";
 import { useResetComponentMessage } from "../../hooks/useResetComponent";
 
 // Redux
-import { getUserDetails } from "../../slices/userSlice";
+import {
+  followUser,
+  getUserDetails,
+  unfollowUser,
+} from "../../slices/userSlice";
 import {
   publishPhoto,
   getUserPhotos,
@@ -22,8 +26,9 @@ const Profile = () => {
   const dispatch = useDispatch();
 
   const resetComponentMessage = useResetComponentMessage(dispatch);
-  // Estado local para armazenar os dados do perfil do usuário visualizado
   const [profileUser, setProfileUser] = useState(null);
+  const [isFollowing, setIsFollowing] = useState(false);
+
   const { user: userAuth } = useSelector((state) => state.auth);
   const {
     photos,
@@ -40,15 +45,21 @@ const Profile = () => {
   const newPhotoForm = useRef();
   const editPhotoForm = useRef();
 
-  // Carregar os detalhes do usuário e suas fotos
   useEffect(() => {
     const loadProfile = async () => {
+      // Buscar detalhes do usuário
       const userDetails = await dispatch(getUserDetails(id)).unwrap();
-      setProfileUser(userDetails); // Armazena os detalhes do usuário localmente
+      setProfileUser(userDetails);
       dispatch(getUserPhotos(id));
+
+      // Verificar se o usuário está seguindo o perfil atual
+      if (userAuth._id) {
+        const isFollowing = userDetails.followers.includes(userAuth._id);
+        setIsFollowing(isFollowing);
+      }
     };
     loadProfile();
-  }, [dispatch, id]);
+  }, [dispatch, id, userAuth._id]);
 
   const handleFile = (e) => {
     const image = e.target.files[0];
@@ -97,6 +108,18 @@ const Profile = () => {
     hideOrShowForms();
   };
 
+  const handleFollow = (userId) => {
+    const userData = { userId, id };
+    dispatch(followUser(userData));
+    setIsFollowing(true);
+  };
+
+  const handleUnfollow = (userId) => {
+    const userData = { userId, id };
+    dispatch(unfollowUser(userData));
+    setIsFollowing(false);
+  };
+
   return (
     <div id="profile">
       {loadingPhoto && <div className="spinner"></div>}
@@ -116,6 +139,14 @@ const Profile = () => {
             <span className="btn">Editar perfil</span>
           </div>
         )}
+        {id !== userAuth._id &&
+          (isFollowing ? (
+            <button onClick={() => handleUnfollow(userAuth._id)}>
+              Deixar de seguir
+            </button>
+          ) : (
+            <button onClick={() => handleFollow(userAuth._id)}>Seguir</button>
+          ))}
       </div>
       {id === userAuth._id && (
         <>

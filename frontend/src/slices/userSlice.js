@@ -3,6 +3,7 @@ import userService from "../services/userService";
 
 const initialState = {
   user: {},
+  following: [],
   error: false,
   success: false,
   loading: false,
@@ -50,6 +51,41 @@ export const getUserDetails = createAsyncThunk(
   }
 );
 
+export const followUser = createAsyncThunk(
+  "user/followUser",
+  async (dataUser, thunkAPI) => {
+    const token = thunkAPI.getState().auth.user.token;
+    let id = dataUser.id;
+    let userId = dataUser.userId;
+    const data = await userService.followUser(id, userId, token);
+
+    if (data.errors) {
+      return thunkAPI.rejectWithValue(data.errors[0]);
+    }
+
+    return data; // Certifique-se de que a resposta tem a estrutura esperada
+  }
+);
+
+export const unfollowUser = createAsyncThunk(
+  "user/unfollowUser",
+  async (dataUser, thunkAPI) => {
+    const token = thunkAPI.getState().auth.user.token;
+
+    let id = dataUser.id;
+    let userId = dataUser.userId;
+    const data = await userService.unfollowUser(id, { userId }, token);
+
+    if (data.errors) {
+      return thunkAPI.rejectWithValue(data.errors[0]);
+    }
+
+    return data; // Certifique-se de que a resposta tem a estrutura esperada
+  }
+);
+
+// Se necessário, adicione ações para obter seguidores e seguidos
+
 export const userSlice = createSlice({
   name: "user",
   initialState,
@@ -95,6 +131,41 @@ export const userSlice = createSlice({
         state.success = true;
         state.error = null;
         state.user = action.payload;
+      })
+
+      .addCase(followUser.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(followUser.fulfilled, (state, action) => {
+        state.loading = false;
+        state.message = "Seguindo com sucesso!";
+        // Atualize a lista de seguidores
+        const newUser = action.payload;
+        if (newUser) {
+          state.user.following.push(newUser._id);
+        }
+      })
+      .addCase(followUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(unfollowUser.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(unfollowUser.fulfilled, (state, action) => {
+        state.loading = false;
+        state.message = "Deixou de seguir com sucesso!";
+        // Atualize a lista de seguidores
+        const unfollowUserId = action.payload._id;
+        state.user.following = state.user.following.filter(
+          (userId) => userId !== unfollowUserId
+        );
+      })
+      .addCase(unfollowUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   },
 });

@@ -46,11 +46,59 @@ const getUserDetails = async (id) => {
     console.log(error);
   }
 };
+const followUser = async (id, userId, token) => {
+  const config = requestConfig("POST", { userId }, token);
+
+  try {
+    const res = await fetch(api + "/users/follow/" + id, config);
+    return await res.json();
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const unfollowUser = async (id, userId, token) => {
+  const config = requestConfig("POST", { userId }, token);
+
+  try {
+    const res = await fetch(api + "/users/unfollow/" + id, config);
+    return await res.json();
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+// Ajuste para obter seguidores e seguidos se necessário
+const getFollowers = async (token) => {
+  const config = requestConfig("GET", null, token);
+
+  try {
+    const res = await fetch(api + "/users/followers/", config);
+    return await res.json();
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const getFollowing = async (token) => {
+  const config = requestConfig("GET", null, token);
+
+  try {
+    const res = await fetch(api + "/users/following/", config);
+    return await res.json();
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 const userService = {
   profile,
   updateProfile,
   getUserDetails,
+  getFollowers,
+  getFollowing,
+  followUser,
+  unfollowUser,
 };
 
 export default userService;
