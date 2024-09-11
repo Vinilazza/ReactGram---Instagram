@@ -3,7 +3,18 @@ import photoService from "../services/photoService";
 
 const initialState = {
   photos: [],
-  photo: {},
+  photo: {
+    comments: [
+      {
+        commentId: null,
+        comment: null,
+        userName: null,
+        userImage: null,
+        userId: null,
+        createdCommentAt: null,
+      },
+    ],
+  },
   error: false,
   success: false,
   loading: false,
@@ -134,12 +145,12 @@ export const searchPhotos = createAsyncThunk(
 );
 export const editComment = createAsyncThunk(
   "photo/comment/edit",
-  async ({ comment, commentId, photoId }, thunkAPI) => {
+  async (commentData, thunkAPI) => {
     const token = thunkAPI.getState().auth.user.token;
 
     const data = await photoService.editComment(
-      { comment, commentId },
-      photoId,
+      { comment: commentData.comment, commentId: commentData.commentId },
+      commentData.id,
       token
     );
 
@@ -319,14 +330,19 @@ export const photoSlice = createSlice({
         state.loading = false;
         state.success = true;
         state.error = null;
+        console.log(action.payload);
 
-        // Atualiza o comentário na foto
-        const updatedComment = action.payload.comment;
-        state.photo.comments = state.photo.comments.map((comment) =>
-          comment._id === updatedComment._id ? updatedComment : comment
+        const updatedComment = action.payload.photo.comments.find(
+          (comment) => comment.commentId === action.payload.comment.commentId
         );
 
-        state.message = action.payload.message;
+        state.photo.comments = state.photo.comments.map((comment) =>
+          comment.commentId === updatedComment.commentId
+            ? updatedComment
+            : comment
+        );
+
+        state.message = "Comentário editado com sucesso!";
       })
       .addCase(editComment.rejected, (state, action) => {
         state.loading = false;
@@ -339,16 +355,12 @@ export const photoSlice = createSlice({
       .addCase(deleteComment.fulfilled, (state, action) => {
         state.loading = false;
 
-        // Atualiza os comentários da foto sem fazer reload
-        const updatedPhoto = action.payload.photo;
+        // Atualiza a lista de comentários com a lista atualizada do backend
+        const updatedComments = action.payload.photo.comments;
 
-        // Mantém o restante das propriedades da foto no estado
-        state.photo = {
-          ...state.photo,
-          comments: updatedPhoto.comments,
-        };
-
-        state.message = "Comentário excluído com sucesso!";
+        // Substitui os comentários atuais pelos comentários atualizados
+        state.photo.comments = updatedComments;
+        state.message = action.payload.message;
       })
 
       .addCase(deleteComment.rejected, (state, action) => {

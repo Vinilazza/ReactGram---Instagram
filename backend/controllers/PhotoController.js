@@ -217,9 +217,6 @@ const editComment = async (req, res) => {
   const { comment, commentId } = req.body; // Novo texto do comentário e ID do comentário
 
   try {
-    const reqUser = req.user; // Usuário autenticado
-
-    // Encontrar a foto pelo ID
     const photo = await Photo.findById(id);
 
     // Verificar se a foto existe
@@ -228,27 +225,28 @@ const editComment = async (req, res) => {
     }
 
     // Encontrar o comentário pelo ID dentro da foto
-    const userComment = photo.comments.id(commentId);
+    const commentToEdit = photo.comments.find(
+      (c) => c.commentId.toString() === commentId
+    );
 
     // Verificar se o comentário existe
-    if (!userComment) {
-      return res.status(404).json({ errors: ["Comentário não encontrado!"] });
+    if (!commentToEdit) {
+      return res.status(404).json({ message: "Comentário não encontrado" });
     }
 
-    // Verificar se o usuário é o autor do comentário (opcional)
-    // if (userComment.userId.toString() !== reqUser._id.toString()) {
-    //   return res.status(403).json({ errors: ["Você não tem permissão para editar este comentário!"] });
-    // }
-
     // Atualizar o comentário
-    userComment.comment = comment;
+    commentToEdit.comment = comment;
+
+    // Marcar o array de comentários como modificado
+    photo.markModified("comments");
 
     // Salvar a foto com o comentário atualizado
     await photo.save();
 
     // Enviar resposta de sucesso
     res.status(200).json({
-      comment: userComment,
+      photo,
+      comment: commentToEdit,
       message: "Comentário editado com sucesso!",
     });
   } catch (error) {

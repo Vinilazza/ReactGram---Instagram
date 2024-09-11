@@ -16,6 +16,8 @@ import {
 import PhotoItem from "../../components/PhotoItem";
 import Loading from "../../components/Loading";
 import EditCommentModal from "../../components/EditCommentModal";
+import Comment from "../../components/Comment";
+import { useCallback } from "react";
 
 const Photo = () => {
   const { id } = useParams();
@@ -28,63 +30,92 @@ const Photo = () => {
   );
   resetMessage();
 
-  //comentarios
+  // Estado dos comentários
+  const [comments, setComments] = useState(photo.comments || []);
+
   const [commentText, setCommentText] = useState("");
-  const [editingComment, setEditingComment] = useState(null); // Para armazenar o comentário que está sendo editado
-  const [isModalOpen, setIsModalOpen] = useState(false); // Controla a visibilidade do modal
+  const [editingComment, setEditingComment] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  //load photo data
   useEffect(() => {
-    dispatch(getPhoto(id));
-  }, [dispatch, id]);
+    if (!photo || photo._id !== id) {
+      // Verifique se já temos a foto no estado antes de buscar
+      dispatch(getPhoto(id));
+    }
+  }, [dispatch, id, photo]);
 
-  const handleLike = (photo) => {
-    dispatch(like(photo._id));
-    resetMessage();
-  };
+  useEffect(() => {
+    setComments(photo.comments || []);
+  }, [photo.comments]);
 
-  const handleComment = (e) => {
-    e.preventDefault();
+  const handleLike = useCallback(
+    (photo) => {
+      dispatch(like(photo._id));
+      resetMessage();
+    },
+    [dispatch, resetMessage]
+  );
+  const handleComment = useCallback(
+    (e) => {
+      e.preventDefault(); // Previna o comportamento padrão de recarregar a página
+      const commentData = {
+        comment: commentText,
+        id: photo._id,
+      };
+      dispatch(comment(commentData));
+      setCommentText(""); // Limpa o campo de comentário
+      resetMessage();
+    },
+    [dispatch, commentText, photo._id, resetMessage]
+  );
 
+  const handleDeleteComment = useCallback(
+    (commentId) => {
+      const commentData = {
+        commentId,
+        id: photo._id,
+      };
+      dispatch(deleteComment(commentData));
+      resetMessage(); // Limpa a mensagem após o dispatch
+    },
+    [dispatch, photo._id, resetMessage]
+  );
+
+  const handleEditClick = useCallback((commentText, commentId) => {
     const commentData = {
       comment: commentText,
-      id: photo._id,
+      commentId: commentId,
     };
-
-    dispatch(comment(commentData));
-    setCommentText("");
-    resetMessage();
-  };
-
-  const handleDeleteComment = (commentId) => {
-    const commentData = {
-      commentId,
-      id: photo._id, // Passa o ID da foto para o backend
-    };
-    dispatch(deleteComment(commentData));
-  };
-
-  const handleEditClick = (comment) => {
-    setEditingComment(comment);
+    setEditingComment(commentData);
     setIsModalOpen(true);
-  };
+  }, []);
+  const handleSaveComment = useCallback(
+    (newCommentText) => {
+      if (editingComment) {
+        dispatch(
+          editComment({
+            commentId: editingComment.commentId,
+            comment: newCommentText,
+            id: photo._id,
+          })
+        );
+        // Atualize o estado local dos comentários
+        setComments((prevComments) =>
+          prevComments.map((comment) =>
+            comment.commentId === editingComment.commentId
+              ? { ...comment, comment: newCommentText }
+              : comment
+          )
+        );
+        setIsModalOpen(false);
+      }
+    },
+    [dispatch, editingComment, photo._id]
+  );
 
-  const handleSaveComment = (newCommentText) => {
-    if (editingComment) {
-      dispatch(
-        editComment({
-          commentId: editingComment._id,
-          comment: newCommentText,
-          id: photo._id,
-        })
-      );
-    }
-  };
-
-  if (loading) {
+  if (!photo && loading) {
     return <Loading />;
   }
-
   return (
     <div id="photo">
       <PhotoItem photo={photo} user={user} handleLike={handleLike} />
@@ -99,38 +130,21 @@ const Photo = () => {
             <form onSubmit={handleComment}>
               <input
                 type="text"
-                placeholder="Insira seu comentario.."
+                placeholder="Insira seu comentário..."
                 onChange={(e) => setCommentText(e.target.value)}
-                value={commentText || ""}
+                value={commentText}
               />
               <input type="submit" value="Enviar" />
             </form>
             {photo.comments.length === 0 && <p>Não há comentários</p>}
             {photo.comments.map((comment) => (
-              <div className="comment" key={comment.commentId}>
-                <div className="author">
-                  {comment.userImage && (
-                    <img
-                      src={`${uploads}/users/${comment.userImage}`}
-                      alt={comment.userName}
-                    />
-                  )}
-                  <Link to={`/users/${comment.userId}`}>
-                    <p>{comment.userName}</p>
-                  </Link>
-                </div>
-                <p>{comment.comment}</p>
-                {comment.userId === user._id && (
-                  <div className="comment-actions">
-                    <button onClick={() => handleEditClick(comment)}>
-                      Editar
-                    </button>
-                    <button onClick={() => handleDeleteComment(comment._id)}>
-                      Excluir
-                    </button>
-                  </div>
-                )}
-              </div>
+              <Comment
+                key={comment.commentId}
+                comment={comment}
+                onEditClick={handleEditClick}
+                onDeleteClick={handleDeleteComment}
+                currentUserId={user._id}
+              />
             ))}
           </>
         )}
