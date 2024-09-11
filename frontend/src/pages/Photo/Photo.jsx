@@ -1,8 +1,6 @@
 import "./Photo.css";
-import { uploads } from "../../utils/config";
 import { useParams } from "react-router-dom";
 import Message from "../../components/Message";
-import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useResetComponentMessage } from "../../hooks/useResetComponent";
@@ -31,7 +29,6 @@ const Photo = () => {
   resetMessage();
 
   // Estado dos comentários
-  const [comments, setComments] = useState(photo.comments || []);
 
   const [commentText, setCommentText] = useState("");
   const [editingComment, setEditingComment] = useState(null);
@@ -43,10 +40,6 @@ const Photo = () => {
       dispatch(getPhoto(id));
     }
   }, [dispatch, id, photo]);
-
-  useEffect(() => {
-    setComments(photo.comments || []);
-  }, [photo.comments]);
 
   const handleLike = useCallback(
     (photo) => {
@@ -98,14 +91,6 @@ const Photo = () => {
             comment: newCommentText,
             id: photo._id,
           })
-        );
-        // Atualize o estado local dos comentários
-        setComments((prevComments) =>
-          prevComments.map((comment) =>
-            comment.commentId === editingComment.commentId
-              ? { ...comment, comment: newCommentText }
-              : comment
-          )
         );
         setIsModalOpen(false);
       }

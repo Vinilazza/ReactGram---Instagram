@@ -1,20 +1,17 @@
 import "./Profile.css";
-
 import { uploads } from "../../utils/config";
-
 import Message from "../../components/Message";
 import { Link } from "react-router-dom";
 import { BsFillEyeFill, BsPencilFill, BsXLg } from "react-icons/bs";
-
 import { useState, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useParams } from "react-router-dom";
+import { useResetComponentMessage } from "../../hooks/useResetComponent";
 
 // Redux
 import { getUserDetails } from "../../slices/userSlice";
 import {
   publishPhoto,
-  resetMessage,
   getUserPhotos,
   deletePhoto,
   updatePhoto,
@@ -22,10 +19,11 @@ import {
 
 const Profile = () => {
   const { id } = useParams();
-
   const dispatch = useDispatch();
 
-  const { user, loading } = useSelector((state) => state.user);
+  const resetComponentMessage = useResetComponentMessage(dispatch);
+  // Estado local para armazenar os dados do perfil do usuário visualizado
+  const [profileUser, setProfileUser] = useState(null);
   const { user: userAuth } = useSelector((state) => state.auth);
   const {
     photos,
@@ -39,77 +37,53 @@ const Profile = () => {
   const [editId, setEditId] = useState("");
   const [editImage, setEditImage] = useState("");
   const [editTitle, setEditTitle] = useState("");
-  //New foerm and edit form refs
   const newPhotoForm = useRef();
   const editPhotoForm = useRef();
 
-  //load user data
+  // Carregar os detalhes do usuário e suas fotos
   useEffect(() => {
-    dispatch(getUserDetails(id));
-    dispatch(getUserPhotos(id));
+    const loadProfile = async () => {
+      const userDetails = await dispatch(getUserDetails(id)).unwrap();
+      setProfileUser(userDetails); // Armazena os detalhes do usuário localmente
+      dispatch(getUserPhotos(id));
+    };
+    loadProfile();
   }, [dispatch, id]);
 
-  function resetComponentMessage() {
-    setTimeout(() => {
-      dispatch(resetMessage());
-    }, 2000);
-  }
-
   const handleFile = (e) => {
-    // image preview
     const image = e.target.files[0];
-
     setImage(image);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    const photoData = {
-      title,
-      image,
-    };
-
-    //build form data
+    const photoData = { title, image };
     const formData = new FormData();
-    const photoFormData = Object.keys(photoData).forEach((key) =>
+    Object.keys(photoData).forEach((key) =>
       formData.append(key, photoData[key])
     );
-    formData.append("photo", photoFormData);
     dispatch(publishPhoto(formData));
-
     setTitle("");
-
     resetComponentMessage();
   };
-  // Exclude an image
+
   const handleDelete = (id) => {
     dispatch(deletePhoto(id));
-
     resetComponentMessage();
   };
 
-  // Show or hide forms
   const hideOrShowForms = () => {
     newPhotoForm.current.classList.toggle("hide");
     editPhotoForm.current.classList.toggle("hide");
   };
 
-  //edit and update photo
   const handleUpdate = (e) => {
     e.preventDefault();
-
-    const photoData = {
-      title: editTitle,
-      id: editId,
-    };
-
+    const photoData = { title: editTitle, id: editId };
     dispatch(updatePhoto(photoData));
-
     resetComponentMessage();
   };
 
-  // Open form
   const handleEdit = (photo) => {
     if (editPhotoForm.current.classList.contains("hide")) {
       hideOrShowForms();
@@ -118,24 +92,30 @@ const Profile = () => {
     setEditTitle(photo.title);
     setEditImage(photo.image);
   };
-  const handleCancelEdit = (e) => {
+
+  const handleCancelEdit = () => {
     hideOrShowForms();
   };
 
   return (
     <div id="profile">
-      {loading && <div className="spinner"></div>}
+      {loadingPhoto && <div className="spinner"></div>}
       <div className="profile-header">
-        {user.profileImage && (
-          <img src={`${uploads}/users/${user.profileImage}`} alt={user.name} />
+        {profileUser?.profileImage && (
+          <img
+            src={`${uploads}/users/${profileUser.profileImage}`}
+            alt={profileUser.name}
+          />
         )}
         <div className="profile-description">
-          <h2>{user.name}</h2>
-          <p>{user.bio}</p>
+          <h2>{profileUser?.name}</h2>
+          <p>{profileUser?.bio}</p>
         </div>
-        <div className="perfilEdit">
-          <span className="btn">Editar perfil</span>
-        </div>
+        {id === userAuth._id && (
+          <div className="perfilEdit">
+            <span className="btn">Editar perfil</span>
+          </div>
+        )}
       </div>
       {id === userAuth._id && (
         <>
@@ -143,10 +123,10 @@ const Profile = () => {
             <h3>Compartilhe algum momento seu:</h3>
             <form onSubmit={handleSubmit}>
               <label>
-                <span>Titulo para a foto</span>
+                <span>Título para a foto</span>
                 <input
                   type="text"
-                  placeholder="Insira um titulo"
+                  placeholder="Insira um título"
                   onChange={(e) => setTitle(e.target.value)}
                   value={title || ""}
                 />
@@ -155,9 +135,9 @@ const Profile = () => {
                 <span>Imagem:</span>
                 <input type="file" onChange={handleFile} />
               </label>
-              {!loadingPhoto && <input type="submit" value={"Postar"} />}
+              {!loadingPhoto && <input type="submit" value="Postar" />}
               {loadingPhoto && (
-                <input type="submit" value={"Aguarde..."} disabled />
+                <input type="submit" value="Aguarde..." disabled />
               )}
             </form>
           </div>
@@ -169,11 +149,11 @@ const Profile = () => {
             <form onSubmit={handleUpdate}>
               <input
                 type="text"
-                placeholder="Insira um titulo"
+                placeholder="Insira um título"
                 onChange={(e) => setEditTitle(e.target.value)}
                 value={editTitle || ""}
               />
-              <input type="submit" value={"Atualizar"} />
+              <input type="submit" value="Atualizar" />
               <button className="cancel-btn" onClick={handleCancelEdit}>
                 Cancelar edição
               </button>

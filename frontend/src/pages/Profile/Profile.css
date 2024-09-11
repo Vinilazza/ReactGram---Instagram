@@ -11,11 +11,13 @@
     border-bottom: 1px solid #363636;
 }
 .profile-header img {
-    width: 100px;
-    height: 100px;
+    width: 120px;
+    height: 120px;
     border-radius: 50%;
-    margin-right: 2em;
-}
+    object-fit: cover;
+    margin-right: 20px;
+  }
+  
 .perfilEdit {
     display: flex;
     justify-content: flex-start;
@@ -32,15 +34,32 @@
     justify-content: flex-end;
 }
 .photo {
-    width: 32%;
-    margin: 0.3%;
-    margin-bottom: 0;
-}
-.photo img {
+    position: relative;
+    overflow: hidden;
+    border-radius: 10px;
+  }
+  
+
+.profile-description h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: bold;
+  }
+  
+  .profile-description p {
+    margin: 5px 0;
+    color: #555;
+  }
+
+  .perfilEdit {
+    margin-top: 10px;
+  }
+
+  .photo img {
     width: 100%;
-    height: 220px;
-    margin-right: 1px;
-}
+    height: 100%;
+    object-fit: cover;
+  }
 .actions {
     display: flex;
     justify-content: space-around;
@@ -56,3 +75,83 @@
     width: 100%;
     margin-bottom: 1em;
 }
+
+.new-photo, .edit-photo {
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+  }
+
+
+.new-photo h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+  
+  .new-photo form label {
+    display: block;
+    margin-bottom: 10px;
+  }
+
+  .new-photo input[type="text"], .new-photo input[type="file"] {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+  }
+  
+  .new-photo input[type="submit"] {
+    background-color: #0095f6;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  
+.user-photos {
+    margin-top: 30px;
+  }
+  
+  .user-photos h2 {
+    margin-bottom: 15px;
+    font-size: 20px;
+    font-weight: bold;
+  }
+  .photos-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+  }
+  
+  .photo {
+    position: relative;
+    overflow: hidden;
+    border-radius: 10px;
+  }
+  
+  .photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .actions {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 10px;
+  }
+  
+  .actions .btn {
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    padding: 5px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }

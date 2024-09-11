@@ -1,7 +1,5 @@
 import "./Navbar.css";
-
 import { uploads } from "../utils/config";
-
 import { NavLink, Link } from "react-router-dom";
 import {
   BsSearch,
@@ -9,42 +7,46 @@ import {
   BsFillPersonFill,
   BsFillCameraFill,
 } from "react-icons/bs";
-
 import { useAuth } from "../hooks/useAuth";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-
-//REDUx
 import { logout, reset } from "../slices/authSlice";
 import { useEffect, useState } from "react";
-import { profile } from "../slices/userSlice";
+import { getUserDetails } from "../slices/userSlice";
 
 const Navbar = () => {
   const { auth } = useAuth();
-  const { user } = useSelector((state) => state.auth);
-
-  const { user: usuario } = useSelector((state) => state.user);
+  const { user: userAuth } = useSelector((state) => state.auth); // Usuário autenticado
 
   const [query, setQuery] = useState("");
-
+  const [profileImage, setProfileImage] = useState(null); // Estado local para imagem de perfil
   const navigate = useNavigate();
-
   const dispatch = useDispatch();
 
   const handleLogout = () => {
     dispatch(logout());
     dispatch(reset());
-
     navigate("/login");
   };
-  // Load user data
+
   useEffect(() => {
-    dispatch(profile());
-  }, [dispatch]);
+    if (userAuth && userAuth._id) {
+      const fetchUserDetails = async () => {
+        try {
+          const result = await dispatch(getUserDetails(userAuth._id)).unwrap();
+          // Atualize o estado local com a imagem de perfil do usuário autenticado
+          setProfileImage(result.profileImage);
+        } catch (error) {
+          console.error("Failed to fetch user details:", error);
+        }
+      };
+
+      fetchUserDetails();
+    }
+  }, [dispatch, userAuth]);
 
   const handleSearch = (e) => {
     e.preventDefault();
-
     if (query) {
       return navigate(`/search?q=${query}`);
     }
@@ -69,33 +71,30 @@ const Navbar = () => {
                 <BsHouseDoorFill />
               </NavLink>
             </li>
-            {user && (
+            {userAuth && (
               <>
                 <li>
-                  <NavLink to={`/users/${user._id}`}>
+                  <NavLink to={`/users/${userAuth._id}`}>
                     <BsFillCameraFill />
                   </NavLink>
                 </li>
-
-                {usuario.profileImage && (
-                  <NavLink to="/profile">
+                {profileImage ? (
+                  <NavLink to={`/users/${userAuth._id}`}>
                     <img
                       id="img-icon"
-                      src={`${uploads}/users/${usuario.profileImage}`}
-                      alt={usuario.name}
+                      src={`${uploads}/users/${profileImage}`}
+                      alt={userAuth.name}
                     />
                   </NavLink>
-                )}
-                {!usuario.profileImage && (
+                ) : (
                   <li>
-                    <NavLink to="/profile">
+                    <NavLink to={`/users/${userAuth._id}`}>
                       <BsFillPersonFill />
                     </NavLink>
                   </li>
                 )}
               </>
             )}
-
             <li>
               <span onClick={handleLogout}>Sair</span>
             </li>

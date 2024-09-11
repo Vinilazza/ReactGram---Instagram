@@ -1,34 +1,39 @@
 import "./PhotoItem.css";
 import { uploads } from "../utils/config";
 import { Link } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { useEffect, useState } from "react";
 import { getUserDetails } from "../slices/userSlice";
-import { useDispatch, useSelector } from "react-redux";
-import { useEffect } from "react";
 import DataPost from "./DataPost";
 import LikeContainer from "./LikeContainer";
 
 const PhotoItem = ({ photo, user, handleLike }) => {
   const dispatch = useDispatch();
 
-  const { user: usuario } = useSelector((state) => state.user);
+  // Estado local para armazenar os detalhes do usuário que postou a foto
+  const [photoUser, setPhotoUser] = useState(null);
 
-  // Load user data
+  // Carregar os dados do usuário do post
   useEffect(() => {
-    if (photo && photo.userId) {
-      dispatch(getUserDetails(photo.userId));
-    }
+    const loadUserDetails = async () => {
+      if (photo && photo.userId) {
+        const response = await dispatch(getUserDetails(photo.userId)).unwrap();
+        setPhotoUser(response); // Armazena os detalhes do usuário localmente
+      }
+    };
+
+    loadUserDetails();
   }, [dispatch, photo]);
 
-  // Verifique se `photo` e `usuario` estão disponíveis antes de tentar acessar suas propriedades
   return (
     <div className="photo-item">
       <div className="photo-title">
-        {usuario?.profileImage && (
+        {photoUser?.profileImage && (
           <Link to={`/users/${photo.userId}`}>
             <img
               id="img-profileImage"
-              src={`${uploads}/users/${usuario.profileImage}`}
-              alt={usuario.name}
+              src={`${uploads}/users/${photoUser.profileImage}`}
+              alt={photoUser.name}
             />
           </Link>
         )}
