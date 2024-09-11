@@ -26,11 +26,13 @@
 #img-profileImage {
     display: flex;
     align-items: center;
-    width: 40px;
-    height: 40px;
-    margin-right: 0.5em;
+    width: 60px;
+    height: 60px;
     border-radius: 50%;
+    object-fit: cover;
+    margin-right: 20px;
 }
+
 div#userName {
     margin-top: 0.7em;
     margin-bottom: 2em;
@@ -38,3 +40,4 @@ div#userName {
 span#title {
     font-size: 1em;
 }
+
