@@ -142,6 +142,7 @@ const followUser = async (req, res) => {
   try {
     const userToFollow = await User.findById(req.params.id);
     const { userId } = req.body;
+    console.log("userIdfollow" + userId);
     const currentUser = await User.findById(userId);
 
     if (!userToFollow || !currentUser) {
@@ -166,7 +167,10 @@ const followUser = async (req, res) => {
 const unfollowUser = async (req, res) => {
   try {
     const userToUnfollow = await User.findById(req.params.id);
-    const currentUser = await User.findById(req.userId);
+    const { userId } = req.body;
+    console.log(userToUnfollow);
+    console.log("UserIdUnfollow" + userId);
+    const currentUser = await User.findById(userId);
 
     if (!userToUnfollow || !currentUser) {
       return res.status(404).json({ message: "Usuário não encontrado" });
