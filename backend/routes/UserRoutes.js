@@ -39,6 +39,6 @@ router.put(
 router.get("/:id", getUserById);
 router.post("/follow/:id", authGuard, followUser);
 router.post("/unfollow/:id", authGuard, unfollowUser);
-router.get("/following", authGuard, getFollowing);
-router.get("/followers", authGuard, getFollowers);
+router.get("/following/:id", authGuard, getFollowing);
+router.get("/followers/:id", authGuard, getFollowers);
 module.exports = router;

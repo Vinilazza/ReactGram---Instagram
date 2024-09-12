@@ -79,7 +79,7 @@ const Navbar = () => {
                   </NavLink>
                 </li>
                 {profileImage ? (
-                  <NavLink to={`/users/${userAuth._id}`}>
+                  <NavLink to={`/profile`}>
                     <img
                       id="img-icon"
                       src={`${uploads}/users/${profileImage}`}

@@ -7,12 +7,14 @@ import { useState, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useParams } from "react-router-dom";
 import { useResetComponentMessage } from "../../hooks/useResetComponent";
-
+import Loading from "../../components/Loading";
 // Redux
 import {
   followUser,
   getUserDetails,
   unfollowUser,
+  getFollowers,
+  getFollowing,
 } from "../../slices/userSlice";
 import {
   publishPhoto,
@@ -20,6 +22,7 @@ import {
   deletePhoto,
   updatePhoto,
 } from "../../slices/photoSlice";
+import FollowersModal from "../../components/FollowersModal";
 
 const Profile = () => {
   const { id } = useParams();
@@ -28,6 +31,11 @@ const Profile = () => {
   const resetComponentMessage = useResetComponentMessage(dispatch);
   const [profileUser, setProfileUser] = useState(null);
   const [isFollowing, setIsFollowing] = useState(false);
+  const [followers, setFollowers] = useState([]); // Estado para armazenar seguidores
+  const [following, setFollowing] = useState([]); // Estado para armazenar seguidos
+  const [isModalOpen, setIsModalOpen] = useState(false); // Estado para abrir/fechar o modal
+  const [modalTitle, setModalTitle] = useState(""); // Para definir o título do modal
+  const [modalUsers, setModalUsers] = useState([]); // Para definir a lista de usuários do modal
 
   const { user: userAuth } = useSelector((state) => state.auth);
   const {
@@ -45,6 +53,11 @@ const Profile = () => {
   const newPhotoForm = useRef();
   const editPhotoForm = useRef();
 
+  const toggleModal = (title, users) => {
+    setModalTitle(title); // Define o título dinâmico
+    setModalUsers(users); // Define a lista de usuários a ser exibida
+    setIsModalOpen(!isModalOpen);
+  };
   useEffect(() => {
     const loadProfile = async () => {
       // Buscar detalhes do usuário
@@ -57,6 +70,12 @@ const Profile = () => {
         const isFollowing = userDetails.followers.includes(userAuth._id);
         setIsFollowing(isFollowing);
       }
+
+      // Buscar seguidores e quem o usuário segue
+      const userFollowers = await dispatch(getFollowers(id)).unwrap();
+      const userFollowing = await dispatch(getFollowing(id)).unwrap();
+      setFollowers(userFollowers);
+      setFollowing(userFollowing);
     };
     loadProfile();
   }, [dispatch, id, userAuth._id]);
@@ -120,34 +139,69 @@ const Profile = () => {
     setIsFollowing(false);
   };
 
+  if (loadingPhoto) {
+    return <Loading />;
+  }
   return (
     <div id="profile">
-      {loadingPhoto && <div className="spinner"></div>}
+      {/* Renderização das informações do perfil */}
       <div className="profile-header">
-        {profileUser?.profileImage && (
-          <img
-            src={`${uploads}/users/${profileUser.profileImage}`}
-            alt={profileUser.name}
-          />
-        )}
-        <div className="profile-description">
-          <h2>{profileUser?.name}</h2>
-          <p>{profileUser?.bio}</p>
-        </div>
-        {id === userAuth._id && (
-          <div className="perfilEdit">
-            <span className="btn">Editar perfil</span>
+        <div className="profile-content">
+          {profileUser?.profileImage && (
+            <div className="img">
+              <img
+                src={`${uploads}/users/${profileUser.profileImage}`}
+                alt={profileUser.name}
+              />
+            </div>
+          )}
+          <div className="profile-description">
+            <h2>{profileUser?.name}</h2>
+            <p>{profileUser?.bio}</p>
           </div>
-        )}
-        {id !== userAuth._id &&
-          (isFollowing ? (
-            <button onClick={() => handleUnfollow(userAuth._id)}>
-              Deixar de seguir
-            </button>
-          ) : (
-            <button onClick={() => handleFollow(userAuth._id)}>Seguir</button>
-          ))}
+          <div className="followers">
+            <h3
+              onClick={() => toggleModal("Seguidores", followers)}
+              style={{ cursor: "pointer", textAlign: "center" }}
+            >
+              {followers.length} <br />
+              Seguidores
+            </h3>
+          </div>
+          <div
+            onClick={() => toggleModal("Seguindo", following)}
+            style={{ cursor: "pointer", textAlign: "center" }}
+            className="following"
+          >
+            <h3>
+              {following.length} <br />
+              Seguindo{" "}
+            </h3>
+          </div>
+          {id !== userAuth._id &&
+            (isFollowing ? (
+              <button
+                id="Seguindo"
+                onClick={() => handleUnfollow(userAuth._id)}
+              >
+                Seguindo
+              </button>
+            ) : (
+              <button id="Seguir" onClick={() => handleFollow(userAuth._id)}>
+                Seguir
+              </button>
+            ))}
+        </div>
+        <div className="followers-following"></div>
       </div>
+
+      <FollowersModal
+        title={modalTitle} // Título dinâmico (Seguidores ou Seguindo)
+        modalUser={modalUsers} // Lista dinâmica de seguidores ou seguidos
+        isOpen={isModalOpen}
+        onClose={toggleModal}
+      />
+
       {id === userAuth._id && (
         <>
           <div className="new-photo" ref={newPhotoForm}>

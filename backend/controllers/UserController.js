@@ -194,16 +194,20 @@ const unfollowUser = async (req, res) => {
   }
 };
 const getFollowers = async (req, res) => {
+  const { id } = req.params;
+
   try {
-    const user = await User.findById(req.userId).populate("followers");
+    const user = await User.findById(id).populate("followers");
     res.status(200).json(user.followers);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 const getFollowing = async (req, res) => {
+  const { id } = req.params;
+
   try {
-    const user = await User.findById(req.userId).populate("following");
+    const user = await User.findById(id).populate("following");
     res.status(200).json(user.following);
   } catch (error) {
     res.status(500).json({ message: error.message });

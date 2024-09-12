@@ -1,5 +1,9 @@
+@font-face {
+  font-family: 'Instagram';
+  src: url('./fonts/Instagram\ Sans.ttf') format('truetype');
+}
 body {
-  font-family: "Roboto", sans-serif;
+  font-family: "Instagram", sans-serif;
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -89,4 +93,7 @@ button:hover, input[type="submit"]:hover {
      transform: rotate(1turn);
   }
 
+}
+.d-flex {
+  display: flex;
 }

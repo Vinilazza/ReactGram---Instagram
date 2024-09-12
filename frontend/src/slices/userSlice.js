@@ -85,6 +85,26 @@ export const unfollowUser = createAsyncThunk(
 );
 
 // Se necessário, adicione ações para obter seguidores e seguidos
+export const getFollowers = createAsyncThunk(
+  "user/followers",
+  async (id, thunkAPI) => {
+    const token = thunkAPI.getState().auth.user.token;
+
+    const data = await userService.getFollowers(id, token);
+
+    return data;
+  }
+);
+export const getFollowing = createAsyncThunk(
+  "user/following",
+  async (id, thunkAPI) => {
+    const token = thunkAPI.getState().auth.user.token;
+
+    const data = await userService.getFollowing(id, token);
+
+    return data;
+  }
+);
 
 export const userSlice = createSlice({
   name: "user",
@@ -164,6 +184,36 @@ export const userSlice = createSlice({
         );
       })
       .addCase(unfollowUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      // Get Followers
+      .addCase(getFollowers.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getFollowers.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = true;
+        state.error = null;
+        state.user.followers = action.payload; // Atualize o estado com a lista de seguidores
+      })
+      .addCase(getFollowers.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      // Get Following
+      .addCase(getFollowing.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getFollowing.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = true;
+        state.error = null;
+        state.user.following = action.payload; // Atualize o estado com a lista de quem o usuário segue
+      })
+      .addCase(getFollowing.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

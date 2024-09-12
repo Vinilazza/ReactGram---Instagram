@@ -69,22 +69,22 @@ const unfollowUser = async (id, userId, token) => {
 };
 
 // Ajuste para obter seguidores e seguidos se necessário
-const getFollowers = async (token) => {
+const getFollowers = async (id, token) => {
   const config = requestConfig("GET", null, token);
 
   try {
-    const res = await fetch(api + "/users/followers/", config);
+    const res = await fetch(api + "/users/followers/" + id, config);
     return await res.json();
   } catch (error) {
     console.log(error);
   }
 };
 
-const getFollowing = async (token) => {
+const getFollowing = async (id, token) => {
   const config = requestConfig("GET", null, token);
 
   try {
-    const res = await fetch(api + "/users/following/", config);
+    const res = await fetch(api + "/users/following/" + id, config);
     return await res.json();
   } catch (error) {
     console.log(error);

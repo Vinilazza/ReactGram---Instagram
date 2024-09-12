@@ -1,29 +1,65 @@
-
 #profile {
-    width: 50%;
-    margin: 0 auto;
+  width: 50%;
+  margin: 0 auto;
 }
+
 .profile-header {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    padding: 1em;
-    border-bottom: 1px solid #363636;
+  display: flex;
+  justify-content: space-between; /* Mantém a distância entre a imagem+texto e o botão */
+  align-items: center;
+  padding: 1em;
+  border-bottom: 1px solid #363636;
 }
-.profile-header img {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin-right: 20px;
-  }
-  
+
+.profile-header .img {
+  margin-right: 20px; /* Espaço entre a imagem e o texto */
+  flex-shrink: 0; /* Garante que a imagem não encolha */
+}
+
+.profile-header .img img {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.profile-header .profile-content {
+  display: flex;
+  align-items: center;
+  flex-grow: 1; /* Faz o texto ocupar o espaço entre a imagem e o botão */
+}
+
+.profile-description {
+  margin-right: auto; /* Empurra o texto para a esquerda (próximo à imagem) */
+}
+
+.profile-description h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.profile-description p {
+  margin: 5px 0;
+  color: #555;
+}
+
 .perfilEdit {
-    display: flex;
-    justify-content: flex-start;
-    width: 100%;
-    margin-top: 1em;
+  display: flex;
+  justify-content: flex-end; /* Alinha o botão à direita */
 }
+
+.perfilEdit .btn,
+button {
+  padding: 10px 15px;
+  background-color: #0095f6;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+
 .new-photo {
     padding: 1em;
     border-bottom: 1px solid #363636;
@@ -55,6 +91,21 @@
     margin-top: 10px;
   }
 
+  #Seguir {
+    letter-spacing: 0.9px;
+    font-family: "Instagram";
+  }
+  #Seguindo {
+    background-color: #494949;
+    opacity: 1;
+    color: #fff;    
+    letter-spacing: 0.9px;
+    font-family: "Instagram";
+  }
+  #Seguindo:hover {
+    transition: 0.4s;
+    background-color: rgba(73, 73, 73,0.8);
+  }
   .photo img {
     width: 100%;
     height: 100%;
@@ -154,4 +205,11 @@
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+  .followers {
+    margin-right: 1em;
+  }
+  .following {
+    margin-right: 1em;
+
   }
