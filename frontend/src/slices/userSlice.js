@@ -152,7 +152,6 @@ export const userSlice = createSlice({
         state.error = null;
         state.user = action.payload;
       })
-
       .addCase(followUser.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -160,16 +159,21 @@ export const userSlice = createSlice({
       .addCase(followUser.fulfilled, (state, action) => {
         state.loading = false;
         state.message = "Seguindo com sucesso!";
-        // Atualize a lista de seguidores
         const newUser = action.payload;
+
         if (newUser) {
+          // Atualiza o estado global seguindo
           state.user.following.push(newUser._id);
         }
+
+        // Chama getFollowers e getFollowing para garantir atualização
+        state.success = true;
       })
       .addCase(followUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
+
       .addCase(unfollowUser.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -177,16 +181,21 @@ export const userSlice = createSlice({
       .addCase(unfollowUser.fulfilled, (state, action) => {
         state.loading = false;
         state.message = "Deixou de seguir com sucesso!";
-        // Atualize a lista de seguidores
         const unfollowUserId = action.payload._id;
+
+        // Atualiza a lista de quem o usuário segue
         state.user.following = state.user.following.filter(
           (userId) => userId !== unfollowUserId
         );
+
+        // Chama getFollowers e getFollowing para garantir atualização
+        state.success = true;
       })
       .addCase(unfollowUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
+
       // Get Followers
       .addCase(getFollowers.pending, (state) => {
         state.loading = true;
@@ -196,12 +205,13 @@ export const userSlice = createSlice({
         state.loading = false;
         state.success = true;
         state.error = null;
-        state.user.followers = action.payload; // Atualize o estado com a lista de seguidores
+        state.followers = action.payload; // Atualiza seguidores no estado
       })
       .addCase(getFollowers.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
+
       // Get Following
       .addCase(getFollowing.pending, (state) => {
         state.loading = true;
@@ -211,7 +221,7 @@ export const userSlice = createSlice({
         state.loading = false;
         state.success = true;
         state.error = null;
-        state.user.following = action.payload; // Atualize o estado com a lista de quem o usuário segue
+        state.following = action.payload; // Atualiza quem o usuário segue
       })
       .addCase(getFollowing.rejected, (state, action) => {
         state.loading = false;

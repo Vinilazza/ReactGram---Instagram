@@ -127,18 +127,31 @@ const Profile = () => {
     hideOrShowForms();
   };
 
-  const handleFollow = (userId) => {
+  const handleFollow = async (userId) => {
     const userData = { userId, id };
     dispatch(followUser(userData));
     setIsFollowing(true);
   };
 
-  const handleUnfollow = (userId) => {
+  const handleUnfollow = async (userId) => {
     const userData = { userId, id };
     dispatch(unfollowUser(userData));
     setIsFollowing(false);
   };
+  useEffect(() => {
+    if (id !== userAuth._id) {
+      // Atualiza a lista de seguidores e seguidos quando a ação é realizada
+      const updateFollowData = async () => {
+        const updatedFollowers = await dispatch(getFollowers(id)).unwrap();
+        const updatedFollowing = await dispatch(getFollowing(id)).unwrap();
 
+        setFollowers(updatedFollowers);
+        setFollowing(updatedFollowing);
+      };
+
+      updateFollowData();
+    }
+  }, [dispatch, id, handleFollow, handleUnfollow]);
   if (loadingPhoto) {
     return <Loading />;
   }
